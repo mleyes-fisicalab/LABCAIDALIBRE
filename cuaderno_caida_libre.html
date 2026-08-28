@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Cuaderno Interactivo | Caída Libre — Universidad del Valle, Sede Cartago</title>
+
+<!-- Tipografías: estética de cuaderno con trazos de marcador -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+
+<!-- MathJax (ecuaciones) -->
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<!-- Chart.js (gráfica experimental) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<style>
+/* ============================================================
+   IDENTIDAD VISUAL — Universidad del Valle, Sede Cartago
+   Paleta: rojo, negro, blanco/crema, gris. Estética de cuaderno.
+   ============================================================ */
+:root{
+  --rojo:#c1272d;
+  --rojo-osc:#8e1b1f;
+  --rojo-suave:#fdeeee;
+  --negro:#1c1c1c;
+  --gris:#6b6b6b;
+  --gris-claro:#e9e5da;
+  --crema:#f7f4ec;
+  --papel:#faf8f1;
+  --ok:#1f7a3d;
+  --sombra:0 12px 30px rgba(28,28,28,.16);
+  --radius:14px;
+  --f-display:'Permanent Marker', cursive;
+  --f-hand:'Patrick Hand', cursive;
+  --f-body:'Nunito', system-ui, sans-serif;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--f-body);
+  color:var(--negro);
+  background:
+    radial-gradient(1000px 500px at 85% -10%, rgba(193,39,45,.08), transparent 60%),
+    radial-gradient(800px 500px at -10% 110%, rgba(28,28,28,.07), transparent 60%),
+    #e8e3d6;
+  min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%; display:block;}
+button{font-family:inherit; cursor:pointer;}
+input,textarea,select{font-family:inherit; font-size:1rem; color:var(--negro);}
+
+/* ---------- Barra de progreso ---------- */
+#progress{position:fixed; top:0; left:0; height:5px; width:0%;
+  background:linear-gradient(90deg,var(--rojo),var(--rojo-osc)); z-index:60; transition:width .35s ease;}
+
+/* ---------- Contenedor de página ---------- */
+.wrap{max-width:960px; margin:0 auto; padding:20px 12px 110px;}
+.page{display:none; animation:fadeIn .35s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
+@media (prefers-reduced-motion: reduce){ .page{animation:none;} *{transition:none !important;} }
+
+/* ---------- Hoja tipo plantilla ---------- */
+.sheet{
+  position:relative; width:100%;
+  aspect-ratio:8.5/11;
+  background:url('imagenes/PLATILLA_HOJA_BLANCO.png') center/100% 100% no-repeat;
+  border-radius:8px; box-shadow:var(--sombra);
+}
+.content{padding:16.5% 9.5% 10%;}
+.ph{ text-align:center; font-size:clamp(.62rem,1.4vw,.8rem); letter-spacing:.14em;
+  color:var(--gris); font-weight:800; text-transform:uppercase; margin-bottom:14px;}
+.ph b{color:var(--rojo);}
+.pf{
+  position:absolute; left:9.5%; right:9.5%; bottom:3.6%;
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+  font-size:clamp(.58rem,1.3vw,.74rem); color:var(--gris); font-weight:700;
+}
+.pnum{
+  font-family:var(--f-hand); font-size:clamp(.8rem,1.6vw,1rem);
+  background:var(--negro); color:#fff; border-radius:50%;
+  min-width:2em; height:2em; display:inline-flex; align-items:center; justify-content:center;
+  transform:rotate(3deg);
+}
+
+/* ---------- Portada ---------- */
+#pg-cover .cover{position:relative; border-radius:10px; overflow:hidden; box-shadow:var(--sombra);}
+#pg-cover .cover img{width:100%;}
+#pg-cover .open-btn{
+  position:absolute; bottom:4.5%; left:50%; transform:translateX(-50%) rotate(-1deg);
+  font-family:var(--f-hand); font-size:clamp(1.05rem,2.6vw,1.5rem);
+  background:#fff; color:var(--negro); border:3px solid var(--negro);
+  border-radius:14px; padding:.5em 1.3em; box-shadow:5px 5px 0 var(--rojo);
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+#pg-cover .open-btn:hover{transform:translateX(-50%) rotate(-1deg) translateY(-3px); box-shadow:7px 8px 0 var(--rojo);}
+
+/* ---------- Titulares estilo pincel ---------- */
+.title{font-family:var(--f-display); font-size:clamp(1.5rem,4.2vw,2.5rem); line-height:1.15; margin-bottom:6px;}
+.title .rojo{color:var(--rojo);}
+.brush{
+  display:inline-block; background:var(--negro); color:#fff;
+  padding:.08em .45em; transform:rotate(-1.2deg); border-radius:4px;
+}
+.subtitle{font-family:var(--f-hand); color:var(--gris); font-size:clamp(1rem,2.2vw,1.25rem); margin-bottom:14px;}
+.underline-red{position:relative; display:inline-block;}
+.underline-red::after{content:""; position:absolute; left:-2%; right:-2%; bottom:-.12em;
+  height:.28em; background:var(--rojo); opacity:.85; border-radius:3px; transform:rotate(-.6deg); z-index:-1;}
+
+/* ---------- Tarjetas ---------- */
+.card{
+  background:rgba(255,255,255,.72); border:2px dashed var(--rojo);
+  border-radius:var(--radius); padding:16px 18px; margin-bottom:14px;
+}
+.card.solid{border:2.5px solid var(--negro); box-shadow:4px 4px 0 rgba(193,39,45,.85);}
+.card h3{font-family:var(--f-hand); font-size:1.25rem; margin-bottom:6px;}
+.card h3 .tagnum{
+  display:inline-flex; align-items:center; justify-content:center;
+  background:var(--rojo); color:#fff; font-family:var(--f-display); font-size:.95rem;
+  min-width:1.7em; height:1.7em; border-radius:50%; margin-right:.45em; transform:rotate(-4deg);
+}
+.card p, .card li{font-size:clamp(.92rem,1.9vw,1.02rem); line-height:1.55;}
+.card ul{padding-left:1.2em;}
+.nota{
+  background:var(--rojo-suave); border-left:5px solid var(--rojo);
+  border-radius:8px; padding:10px 14px; font-size:.95rem; margin-top:10px;
+}
+.nota b{color:var(--rojo-osc);}
+
+/* ---------- Botones ---------- */
+.btn{
+  font-family:var(--f-hand); font-size:1.02rem;
+  background:#fff; color:var(--negro); border:2.5px solid var(--negro);
+  border-radius:12px; padding:.42em 1em; box-shadow:3px 3px 0 var(--rojo);
+  transition:transform .12s ease, box-shadow .12s ease; user-select:none; -webkit-user-select:none;
+  touch-action:manipulation;
+}
+.btn:hover{transform:translateY(-2px); box-shadow:4px 5px 0 var(--rojo);}
+.btn:active{transform:translateY(1px); box-shadow:2px 2px 0 var(--rojo);}
+.btn.rojo{background:var(--rojo); color:#fff; border-color:var(--rojo-osc); box-shadow:3px 3px 0 var(--negro);}
+.btn.mini{font-size:.9rem; padding:.3em .8em;}
+.btn-row{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px;}
+
+/* ---------- Índice ---------- */
+.index-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px;}
+.index-item{
+  display:flex; align-items:center; gap:10px; text-align:left;
+  background:rgba(255,255,255,.8); border:2px solid var(--negro); border-radius:12px;
+  padding:9px 12px; font-family:var(--f-hand); font-size:1.02rem;
+  box-shadow:3px 3px 0 rgba(193,39,45,.8); transition:transform .12s ease;
+}
+.index-item:hover{transform:translateY(-2px);}
+.index-item .n{
+  font-family:var(--f-display); font-size:.85rem; color:#fff; background:var(--negro);
+  min-width:1.9em; height:1.9em; border-radius:50%; display:inline-flex;
+  align-items:center; justify-content:center; flex:0 0 auto; transform:rotate(-4deg);
+}
+
+/* ---------- Objetivos / materiales ---------- */
+.obj-grid{display:grid; grid-template-columns:1fr; gap:12px;}
+.mat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px;}
+.mat-card{background:rgba(255,255,255,.8); border:2.5px solid var(--negro); border-radius:var(--radius);
+  padding:14px; text-align:center; box-shadow:4px 4px 0 rgba(193,39,45,.85);}
+.mat-card svg{margin:0 auto 8px;}
+.mat-card h4{font-family:var(--f-hand); font-size:1.15rem;}
+.mat-card p{font-size:.9rem; color:#333; line-height:1.45;}
+
+/* ---------- Fórmulas destacadas ---------- */
+.formula-box{
+  background:#fff; border:3px solid var(--negro); border-radius:var(--radius);
+  box-shadow:5px 5px 0 var(--rojo); padding:12px 16px; text-align:center;
+  font-size:clamp(1rem,2.4vw,1.2rem); margin:12px auto; max-width:420px;
+}
+.var-chips{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:8px;}
+.chip{background:var(--crema); border:2px solid var(--negro); border-radius:999px;
+  padding:.25em .8em; font-size:.92rem; font-weight:700;}
+.chip b{color:var(--rojo);}
+
+/* ---------- Tablas de datos ---------- */
+.tabla-wrap{overflow-x:auto;}
+table.tabla{width:100%; border-collapse:collapse; background:#fff; font-size:1rem;}
+table.tabla th{background:var(--negro); color:#fff; font-family:var(--f-hand); font-weight:400;
+  letter-spacing:.03em; padding:8px 10px; font-size:1.05rem;}
+table.tabla td{border:2px solid var(--negro); padding:6px 8px; text-align:center;}
+table.tabla input{
+  width:100%; min-width:90px; border:none; outline:none; background:transparent;
+  text-align:center; font-size:1.05rem; font-family:var(--f-hand); padding:4px 2px;
+}
+table.tabla input:focus{background:var(--rojo-suave);}
+table.tabla input.bad{background:#ffe2e2; color:var(--rojo-osc);}
+.h-line{display:flex; align-items:center; gap:8px; font-family:var(--f-hand); font-size:1.2rem; margin-bottom:10px; flex-wrap:wrap;}
+.h-line input{
+  width:120px; border:none; border-bottom:3px solid var(--rojo); background:transparent;
+  font-family:var(--f-hand); font-size:1.15rem; text-align:center; outline:none; padding:2px 4px;
+}
+.prom-box{
+  margin-top:12px; background:var(--crema); border:2px dashed var(--negro);
+  border-radius:12px; padding:10px 14px; font-size:1rem; line-height:1.7;
+  display:none;
+}
+.prom-box.show{display:block;}
+.prom-box .res{font-family:var(--f-hand); font-size:1.25rem; color:var(--rojo-osc);}
+
+/* Tabla 7 */
+#t7 td.autoval{font-family:var(--f-hand); font-size:1.08rem;}
+td.empty{color:#b9b3a4; font-style:italic; font-size:.9rem;}
+
+/* ---------- Análisis: barras h ---------- */
+.mini-bars{display:grid; gap:8px; margin-top:10px;}
+.mini-bar{display:grid; grid-template-columns:64px 1fr 92px; align-items:center; gap:8px; font-size:.92rem;}
+.mini-bar .bar{height:16px; background:linear-gradient(90deg,var(--rojo),var(--rojo-osc));
+  border-radius:6px; border:1.5px solid var(--negro); min-width:4px; transition:width .4s ease;}
+.mini-bar .lab{font-family:var(--f-hand);}
+
+/* ---------- Gráfica ---------- */
+.chart-box{background:#fff; border:3px solid var(--negro); border-radius:var(--radius);
+  box-shadow:5px 5px 0 var(--rojo); padding:12px;}
+.fit-row{display:flex; flex-wrap:wrap; gap:14px; align-items:center; margin:12px 0; font-size:.98rem;}
+.fit-row label{display:flex; align-items:center; gap:6px; font-family:var(--f-hand); font-size:1.05rem; cursor:pointer;}
+.fit-row input{accent-color:var(--rojo); width:18px; height:18px;}
+.eq-live{
+  background:var(--crema); border:2px dashed var(--rojo); border-radius:12px;
+  padding:10px 14px; text-align:center; font-size:1.05rem; margin-top:10px;
+}
+.badge-r2{display:inline-block; background:var(--negro); color:#fff; border-radius:999px;
+  padding:.15em .8em; font-size:.85rem; margin-top:6px;}
+
+/* ---------- Pasos de cálculo ---------- */
+.steps{counter-reset:paso; display:grid; gap:10px;}
+.step{position:relative; background:rgba(255,255,255,.8); border:2px solid var(--negro);
+  border-radius:12px; padding:12px 14px 12px 52px; box-shadow:3px 3px 0 rgba(193,39,45,.8);}
+.step::before{
+  counter-increment:paso; content:counter(paso);
+  position:absolute; left:12px; top:12px;
+  font-family:var(--f-display); color:#fff; background:var(--rojo);
+  width:1.8em; height:1.8em; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  transform:rotate(-5deg); font-size:.95rem;
+}
+.step h4{font-family:var(--f-hand); font-size:1.12rem; margin-bottom:3px;}
+.step p{font-size:.95rem; line-height:1.5;}
+
+/* ---------- Comparación aceleración ---------- */
+.vs-grid{display:grid; grid-template-columns:1fr auto 1fr; gap:10px; align-items:stretch; margin:12px 0;}
+.vs-card{background:#fff; border:3px solid var(--negro); border-radius:var(--radius);
+  padding:14px; text-align:center; box-shadow:4px 4px 0 rgba(193,39,45,.85);}
+.vs-card .big{font-family:var(--f-hand); font-size:clamp(1.4rem,3.6vw,2rem); color:var(--rojo-osc);}
+.vs-card .lab{font-size:.85rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--gris);}
+.vs-mid{display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:1.4rem; color:var(--negro);}
+.gref-line{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-family:var(--f-hand); font-size:1.1rem;}
+.gref-line input{width:110px; border:none; border-bottom:3px solid var(--rojo); background:transparent;
+  text-align:center; font-family:var(--f-hand); font-size:1.1rem; outline:none;}
+
+/* ---------- Preguntas y conclusiones ---------- */
+textarea.resp{
+  width:100%; min-height:110px; resize:vertical;
+  background:repeating-linear-gradient(#fff, #fff 30px, #f0d8d8 31px);
+  border:2px solid var(--negro); border-radius:12px; padding:10px 14px;
+  line-height:31px; font-size:1rem; outline:none;
+}
+textarea.resp:focus{border-color:var(--rojo); box-shadow:3px 3px 0 rgba(193,39,45,.6);}
+.hint-chips{display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 4px;}
+.hint-chips .chip{font-size:.82rem; background:#fff;}
+
+/* ---------- Glosario ---------- */
+.glos-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px;}
+.glos-item{background:rgba(255,255,255,.85); border:2px solid var(--negro); border-radius:12px; overflow:hidden;}
+.glos-item>button{
+  width:100%; text-align:left; background:transparent; border:none;
+  font-family:var(--f-hand); font-size:1.08rem; padding:10px 14px;
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+}
+.glos-item>button::after{content:"+"; font-family:var(--f-display); color:var(--rojo); font-size:1.1rem; transition:transform .2s;}
+.glos-item.open>button::after{transform:rotate(45deg);}
+.glos-item .def{display:none; padding:0 14px 12px; font-size:.92rem; line-height:1.5; color:#333;}
+.glos-item.open .def{display:block;}
+.glos-item.open{border-color:var(--rojo); box-shadow:3px 3px 0 rgba(193,39,45,.7);}
+
+/* ---------- Simulación ---------- */
+.sim-grid{display:grid; grid-template-columns:minmax(190px,240px) 1fr; gap:16px; align-items:start;}
+.sim-canvas-wrap{background:#fff; border:3px solid var(--negro); border-radius:var(--radius);
+  box-shadow:5px 5px 0 var(--rojo); padding:8px; }
+canvas#simCanvas{width:100%; height:auto; display:block;}
+.sim-ctrl{display:grid; gap:12px;}
+.sim-ctrl .lecture{display:flex; gap:10px; flex-wrap:wrap;}
+.lect{background:#fff; border:2px solid var(--negro); border-radius:12px; padding:8px 12px; min-width:110px; text-align:center;}
+.lect .v{font-family:var(--f-hand); font-size:1.3rem; color:var(--rojo-osc);}
+.lect .l{font-size:.75rem; font-weight:800; letter-spacing:.06em; color:var(--gris); text-transform:uppercase;}
+input[type=range]{width:100%; accent-color:var(--rojo); height:28px;}
+
+/* ---------- SVG montaje ---------- */
+.montaje-wrap{background:#fff; border:3px solid var(--negro); border-radius:var(--radius);
+  box-shadow:5px 5px 0 var(--rojo); padding:10px; position:relative;}
+.montaje-wrap svg{width:100%; height:auto; max-height:560px; display:block; margin:0 auto;}
+.part{cursor:pointer;}
+.part .hitzone{fill:transparent;}
+.part:hover .core, .part.sel .core{filter:drop-shadow(0 0 4px rgba(193,39,45,.8));}
+#montajeTip{
+  position:absolute; pointer-events:none; background:var(--negro); color:#fff;
+  font-family:var(--f-hand); font-size:.95rem; padding:.3em .8em; border-radius:8px;
+  transform:translate(-50%,-130%); white-space:nowrap; opacity:0; transition:opacity .15s; z-index:5;
+}
+#montajeTip.show{opacity:1;}
+#montajeTip::after{content:""; position:absolute; left:50%; top:100%; transform:translateX(-50%);
+  border:6px solid transparent; border-top-color:var(--negro);}
+
+/* ---------- Navegación inferior ---------- */
+#nav{
+  position:fixed; left:0; right:0; bottom:0; z-index:50;
+  background:rgba(247,244,236,.96); backdrop-filter:blur(8px);
+  border-top:3px solid var(--rojo); box-shadow:0 -6px 20px rgba(0,0,0,.12);
+}
+#nav .inner{max-width:960px; margin:0 auto; display:flex; align-items:center; gap:8px; padding:9px 12px;}
+#nav .btn{padding:.34em .8em; min-height:44px; min-width:44px;}
+#pageLabel{margin-left:auto; margin-right:auto; font-family:var(--f-hand); font-size:1.02rem; color:var(--negro); text-align:center;}
+#pageLabel b{color:var(--rojo);}
+
+/* ---------- Menú lateral ---------- */
+#menu{
+  position:fixed; top:0; right:0; height:100dvh; width:min(320px,88vw); z-index:70;
+  background:var(--crema); border-left:4px solid var(--rojo); box-shadow:-10px 0 30px rgba(0,0,0,.25);
+  transform:translateX(105%); transition:transform .3s ease; display:flex; flex-direction:column;
+}
+#menu.open{transform:none;}
+#menu header{padding:16px; border-bottom:2px dashed var(--rojo);}
+#menu header .t{font-family:var(--f-display); font-size:1.1rem;}
+#menu header .s{font-family:var(--f-hand); color:var(--gris); font-size:.95rem;}
+#menu nav{overflow-y:auto; padding:10px; flex:1;}
+#menu nav button{
+  display:flex; gap:8px; align-items:center; width:100%; text-align:left;
+  background:transparent; border:none; border-radius:10px; padding:8px 10px;
+  font-family:var(--f-hand); font-size:1.02rem;
+}
+#menu nav button:hover{background:rgba(193,39,45,.1);}
+#menu nav button.cur{background:var(--rojo); color:#fff;}
+#menu nav button .mn{font-size:.8rem; font-family:var(--f-body); font-weight:800; color:inherit; opacity:.65; min-width:1.6em;}
+#menu footer{padding:12px; border-top:2px dashed var(--rojo); display:grid; gap:8px;}
+#menuOverlay{position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:65; opacity:0; pointer-events:none; transition:opacity .3s;}
+#menuOverlay.show{opacity:1; pointer-events:auto;}
+
+/* ---------- Toast ---------- */
+#toast{
+  position:fixed; left:50%; bottom:86px; transform:translateX(-50%) translateY(20px);
+  background:var(--negro); color:#fff; font-family:var(--f-hand); font-size:1rem;
+  padding:.5em 1.2em; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.3);
+  opacity:0; pointer-events:none; transition:all .3s ease; z-index:80;
+}
+#toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+#toast.ok{border-left:6px solid #4caf50;}
+#toast.warn{border-left:6px solid var(--rojo);}
+
+/* ---------- Responsive ---------- */
+@media (max-width:640px){
+  .wrap{padding:12px 6px 104px;}
+  .content{padding:15% 8% 11%;}
+  .sim-grid{grid-template-columns:1fr;}
+  .vs-grid{grid-template-columns:1fr;}
+  .vs-mid{padding:2px 0;}
+  #nav .inner{gap:6px; padding:8px 8px;}
+  #pageLabel{font-size:.9rem;}
+  .index-grid{grid-template-columns:1fr 1fr;}
+  .index-item{font-size:.92rem; padding:8px;}
+}
+@media (max-width:420px){
+  .index-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<main class="wrap">
+
+<!-- ==================== 0 · PORTADA ==================== -->
+<section class="page" id="pg-cover" data-title="Portada">
+  <div class="cover">
+    <img src="imagenes/PORTADA.png" alt="Portada — Cuaderno Interactivo, Laboratorio de Física, Práctica Caída Libre. Universidad del Valle, Sede Cartago. 106012C Física I + Laboratorio. Profesora: María Leyes.">
+    <button class="open-btn" data-goto="1">Abrir cuaderno ✎ →</button>
+  </div>
+</section>
+
+<!-- ==================== 1 · ÍNDICE ==================== -->
+<section class="page" id="pg-indice" data-title="Índice">
+  <div class="sheet"><div class="content">
+    <div class="ph">Universidad del Valle — <b>Sede Cartago</b> · Laboratorio de Física I</div>
+    <h1 class="title"><span class="brush">ÍNDICE</span> <span class="rojo">interactivo</span></h1>
+    <p class="subtitle">Toca cualquier sección para ir directamente a esa página del cuaderno.</p>
+    <div class="index-grid" id="indexGrid"></div>
+  </div>
+  <footer class="pf"><span>106012C – FÍSICA I + LABORATORIO | PRÁCTICA: CAÍDA LIBRE · Prof. María Leyes</span><span class="pnum"></span></footer>
+  </div>
+</section>
+
+<!-- ==================== 2 · PRESENTACIÓN ==================== -->
+<section class="page" id="pg-present" data-title="Presentación de la práctica">
+  <div class="sheet"><div class="content">
+    <div class="ph">Universidad del Valle — <b>Sede Cartago</b> · Laboratorio de Física I</div>
+    <h1 class="title">Presentación de la <span class="rojo underline-red">práctica</span></h1>
+    <p class="subtitle">Estudio experimental del movimiento de un cuerpo en caída libre</p>
+    <div class="card">
+      <p>En esta práctica de laboratorio estudiarás el movimiento de un <b>balín</b> que se deja caer desde el reposo bajo la acción de la <b>gravedad</b>. Utilizando un instrumento con sensor, medirás el <b>tiempo de caída</b> del balín para <b>seis alturas diferentes</b> y registrarás tus datos en las tablas de este cuaderno.</p>
+      <br>
+      <p>Con las parejas de valores altura–tiempo construirás una <b>gráfica experimental</b>, obtendrás la <b>ecuación</b> que describe el movimiento y, a partir de ella, determinarás <b>experimentalmente el valor de la aceleración</b> del balín, para luego compararlo con el valor conocido de la aceleración de la gravedad.</p>
+    </div>
+    <div class="nota"><b>Eje central de la práctica:</b> estudio experimental del movimiento de un cuerpo en caída libre y determinación experimental de la aceleración.</div>
+  </div>
+  <footer class="pf"><span>106012C – FÍSICA I + LABORATORIO | PRÁCTICA: CAÍDA LIBRE · Prof. María Leyes</span><span class="pnum"></span></footer>
+  </div>
+</section>
+
+<!-- ==================== 3 · OBJETIVOS ==================== -->
+<section class="page" id="pg-objetivos" data-title="Objetivos">
+  <div class="sheet"><div class="content">
+    <div class="ph">Universidad del Valle — <b>Sede Cartago</b> · Laboratorio de Física I</div>
+    <h1 class="title"><span class="brush">OBJETIVOS</span></h1>
+    <p class="subtitle">¿Qué buscamos con esta experiencia?</p>
+    <div class="obj-grid">
+      <div class="card solid">
+        <h3><span class="tagnum">1</span> Objetivo general</h3>
+        <p>Estudiar el <b>movimiento uniformemente acelerado</b> de un cuerpo que cae bajo la acción de la gravedad, a partir de mediciones experimentales de altura y tiempo.</p>
+      </div>
+      <div class="card solid">
+        <h3><span class="tagnum">2</span> Objetivo específico</h3>
+        <p>Calcular el <b>valor experimental de la aceleración</b> del balín y <b>compararlo</b> con el valor conocido de la aceleración de la gravedad.</p>
+      </div>
+    </div>
+    <div class="nota">Al finalizar podrás responder: ¿qué función relaciona la altura con el tiempo?, ¿qué valor tiene la aceleración obtenida? y ¿qué tipo de movimiento describe el balín?</div>
+  </div>
+  <footer class="pf"><span>106012C – FÍSICA I + LABORATORIO | PRÁCTICA: CAÍDA LIBRE · Prof. María Leyes</span><span class="pnum"></span></footer>
+  </div>
+</section>
+
+<!-- ==================== 4 · MATERIALES ==================== -->
+<section class="page" id="pg-materiales" data-title="Materiales">
+  <div class="sheet"><div class="content">
+    <div class="ph">Universidad del Valle — <b>Sede Cartago</b> · Laboratorio de Física I</div>
+    <h1 class="title">Materiales de <span class="rojo underline-red">laboratorio</span></h1>
+    <p class="subtitle">Estos son los tres elementos que usarás en el montaje.</p>
+    <div class="mat-grid">
+      <div class="mat-card">
+        <svg width="90" height="90" viewBox="0 0 90 90" aria-hidden="true">
+          <circle cx="45" cy="50" r="28" fill="#fff" stroke="#1c1c1c" stroke-width="3"/>
+          <circle cx="45" cy="50" r="20" fill="none" stroke="#c1272d" stroke-width="2" stroke-dasharray="3 4"/>
+          <line x1="45" y1="50" x2="45" y2="36" stroke="#c1272d" stroke-width="3" stroke-linecap="round"/>
+          <line x1="45" y1="50" x2="55" y2="54" stroke="#1c1c1c" stroke-width="2.4" stroke-linecap="round"/>
+          <rect x="38" y="12" width="14" height="8" rx="2" fill="#1c1c1c"/>
+          <line x1="45" y1="20" x2="45" y2="24" stroke="#1c1c1c" stroke-width="3"/>
+          <circle cx="45" cy="50" r="2.6" fill="#1c1c1c"/>
+        </svg>
+        <h4>Cronómetro UTP</h4>
+        <p>Mide con precisión el <b>tiempo de caída</b> del balín entre la liberación y el impacto.</p>
+      </div>
+      <div class="mat-card">
+        <svg width="90" height="90" viewBox="0 0 90 90" aria-hidden="true">
+          <rect x="14" y="30" width="62" height="22" rx="4" fill="#fff" stroke="#1c1c1c" stroke-width="3"/>
+          <g stroke="#1c1c1c" stroke-width="2">
+            <line x1="22" y1="30" x2="22" y2="40"/><line x1="32" y1="30" x2="32" y2="37"/>
+            <line x1="42" y1="30" x2="42" y2="40"/><line x1="52" y1="30" x2="52" y2="37"/>
+            <line x1="62" y1="30" x2="62" y2="40"/><line x1="70" y1="30" x2="70" y2="37"/>
+          </g>
+          <circle cx="45" cy="64" r="9" fill="#c1272d"/>
+          <path d="M39 64a6 6 0 0 0 12 0" fill="none" stroke="#fff" stroke-width="2"/>
+          <path d="M28 60q-5 4 0 8 M62 60q5 4 0 8" fill="none" stroke="#c1272d" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <h4>Cinta métrica con sensor acústico</h4>
+        <p>Permite medir la <b>altura h</b> desde la cual se libera el balín.</p>
+      </div>
+      <div class="mat-card">
+        <svg width="90" height="90" viewBox="0 0 90 90" aria-hidden="true">
+          <circle cx="45" cy="52" r="17" fill="#3a3a3a" stroke="#1c1c1c" stroke-width="3"/>
+          <ellipse cx="39" cy="45" rx="6" ry="4" fill="#ffffff" opacity=".75"/>
+          <g stroke="#c1272d" stroke-width="2.4" stroke-linecap="round">
+            <line x1="45" y1="12" x2="45" y2="24"/><line x1="36" y1="15" x2="38" y2="25"/><line x1="54" y1="15" x2="52" y2="25"/>
+          </g>
+        </svg>
+        <h4>Balín</h4>
+        <p>Esfera metálica que se deja <b>caer libremente</b>; es el cuerpo cuyo movimiento estudiamos.</p>
+      </div>
+    </div>
+    <div class="nota"><b>Recuerda:</b> manipula los instrumentos con cuidado y verifica que el sensor esté bien ajustado antes de cada medición.</div>
+  </div>
+  <footer class="pf"><span>106012C – FÍSICA I + LABORATORIO | PRÁCTICA: CAÍDA LIBRE · Prof. María Leyes</span><span class="pnum"></span></footer>
+  </div>
+</section>
+
+<!-- ==================== 5 · FUNDAMENTO FÍSICO ==================== -->
+<section class="page" id="pg-fundamento" data-title="Fundamento físico">
+  <div class="sheet"><div class="content">
+    <div class="ph">Universidad del Valle — <b>Sede Cartago</b> · Laboratorio de Física I</div>
+    <h1 class="title">Fundamento <span class="rojo underline-red">físico</span></h1>
+    <p class="subtitle">La caída libre como movimiento uniformemente acelerado</p>
+
+    <div class="card">
+      <p>Un cuerpo está en <b>caída libre</b> cuando se mueve únicamente bajo la acción de la <b>gravedad</b> (despreciando la resistencia del aire). En ese caso, su rapidez aumenta de manera uniforme mientras cae: se trata de un <b>movimiento uniformemente acelerado (MUA)</b>, con aceleración constante dirigida hacia abajo.</p>
+    </div>
+
+    <div class="card">
+      <h3>Relación entre altura y tiempo</h3>
+      <p>Si el balín parte del <b>reposo</b> y cae una altura <i>h</i> en un tiempo <i>t</i> con aceleración constante <i>a</i>, entonces:</p>
+      <div class="formula-box">$$h=\frac{1}{2}\,a\,t^{2}$$</div>
+      <div class="var-chips">
+        <span class="chip"><b>h</b> : altura recorrida (m)</span>
+        <span class="chip"><b>a</b> : aceleración (m/s²)</span>
+        <span class="chip"><b>t</b> : tiempo de caída (s)</span>
+      </div>
+      <p style="margin-top:10px">La altura <b>no crece linealmente</b> con el tiempo: crece con el <b>cuadrado</b> del tiempo. Por eso, al duplicar el tiempo de caída, la distancia recorrida se multiplica por cuatro.</p>
+    </div>
+
+    <div class="card">
+      <h3>Explóralo tú: simulación de caída libre</h3>
+      <p>Mueve el control de <b>altura h</b>, suelta el balín y observa cómo cambian la posición y el tiempo. Las marcas muestran la posición del balín en intervalos iguales de tiempo: fíjate cómo se van separando cada vez más.</p>
+      <div class="sim-grid" style="margin-top:12px">
+        <div class="sim-canvas-wrap"><canvas id="simCanvas" width="260" height="430" aria-label="Simulación de un balín en caída libre"></canvas></div>
+        <div class="sim-ctrl">
+          <div>
+            <label for="simH" style="font-family:var(--f-hand); font-size:1.1rem">Altura h = <b id="simHval" style="color:var(--rojo-osc)">1.20</b> m</label>
+            <input type="range" id="simH" min="0.20" max="2.00" step="0.05" value="1.20" aria-label="Altura de liberación en metros">
+          </div>
+          <div class="lecture">
+            <div class="lect"><div class="v" id="simT">0.000</div><div class="l">tiempo t (s)</div></div>
+            <div class="lect"><div class="v" id="simY">1.20</div><div class="l">posición y (m)</div></div>
+            <div class="lect"><div class="v" id="simTfin">—</div><div class="l">t de caída (s)</div></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn rojo" id="simPlay">▶ Soltar balín</button>
+            <button class="btn" id="simReset">↺ Reiniciar</button>
+          </div>
+          <p style="font-size:.85rem; color:var(--gris)">La animación se muestra en <b>cámara lenta (×4)</b> para poder apreciar el movimiento. El tiempo indicado es el tiempo físico real (con a = 9.8 m/s²).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="pf"><span>106012C – FÍSICA I + LABORATORIO | PRÁCTICA: CAÍDA LIBRE · Prof. María Leyes</span><span class="pnum"></span></footer>
+  </div>
+</section>
+
+<!-- ==================== 6 · MONTAJE EXPERIMENTAL ==================== -->
+<section class="page" id="pg-montaje" data-title="Montaje experimental">
+  <div class="sheet"><div class="content">
+    <div class="ph">Universidad del Valle — <b>Sede Cartago</b> · Laboratorio de Física I</div>
+    <h1 class="title">Montaje <span class="rojo underline-red">experimental</span></h1>
+    <p class="subtitle">Pasa el cursor (o toca) cada parte del montaje para ver su nombre.</p>
+    <div class="montaje-wrap">
+      <div id="montajeTip"></div>
+      <svg viewBox="0 0 340 500" role="img" aria-label="Esquema del montaje experimental de caída libre">
+        <!-- fondo cuadricula sutil -->
+        <defs>
+          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M20 0H0V20" fill="none" stroke="#eee5d8" stroke-width="1"/>
+          </pattern>
+          <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0L10 5L0 10z" fill="#c1272d"/>
+          </marker>
+        </defs>
+        <rect x="0" y="0" width="340" height="500" fill="url(#grid)"/>
+
+        <!-- base -->
+        <g class="part" data-name="Base del montaje">
+          <path class="core" d="M60 470 L150 445 L280 455 L200 482 Z" fill="#d8d3c6" stroke="#1c1c1c" stroke-width="3"/>
+          <rect class="hitzone" x="55" y="440" width="230" height="48"/>
+        </g>
+
+        <!-- sensor de impacto -->
+        <g class="part" data-name="Sensor de impacto">
+          <ellipse class="core" cx="150" cy="452" rx="17" ry="7" fill="#c1272d" stroke="#1c1c1c" stroke-width="2.5"/>
+          <rect class="hitzone" x="128" y="440" width="44" height="24"/>
+        </g>
+
+        <!-- torre -->
+        <g class="part" data-name="Torre (soporte vertical)">
+          <rect class="core" x="132" y="55" width="9" height="395" fill="#8a8a8a" stroke="#1c1c1c" stroke-width="2.5"/>
+          <rect class="core" x="150" y="55" width="9" height="395" fill="#b5b5b5" stroke="#1c1c1c" stroke-width="2.5"/>
+          <rect class="hitzone" x="126" y="55" width="40" height="395"/>
+        </g>
+
+        <!-- mecanismo de liberación (imán) -->
+        <g class="part" data-name="Mecanismo de liberación (imán)">
+          <rect class="core" x="120" y="42" width="52" height="22" rx="4" fill="#1c1c1c" stroke="#1c1c1c" stroke-width="2"/>
+          <circle class="core" cx="146" cy="64" r="5" fill="#c1272d"/>
+          <rect class="hitzone" x="112" y="34" width="70" height="40"/>
+        </g>
+
+        <!-- punto de liberación -->
+        <g class="part" data-name="Punto de liberación del balín">
+          <circle class="core" cx="146" cy="86" r="4" fill="none" stroke="#c1272d" stroke-width="2.5" stroke-dasharray="3 3"/>
+          <rect class="hitzone" x="132" y="74" width="30" height="26"/>
+        </g>
+
+        <!-- sensores ópticos -->
+        <g class="part" data-name="Sensor óptico superior">
+          <rect class="core" x="159" y="150" width="46" height="14" rx="3" fill="#e7e2d4" stroke="#1c1c1c" stroke-width="2.5"/>
+          <circle class="core" cx="166" cy="157" r="3.2" fill="#c1272d"/>
+          <rect class="hitzone" x="155" y="142" width="56" height="30"/>
+        </g>
+        <g class="part" data-name="Sensor óptico inferior">
+          <rect class="core" x="159" y="330" width="46" height="14" rx="3" fill="#e7e2d4" stroke="#1c1c1c" stroke-width="2.5"/>
+          <circle class="core" cx="166" cy="337" r="3.2" fill="#c1272d"/>
+          <rect class="hitzone" x="155" y="322" width="56" height="30"/>
+        </g>
+
+        <!-- unidad de control -->
+        <g class="part" data-name="Unidad de control (cronómetro UTP)">
+          <path class="core" d="M205 344 C 250 360 260 390 252 408" fill="none" stroke="#1c1c1c" stroke-width="2.5" stroke-dasharray="5 4"/>
+          <rect class="core" x="232" y="405" width="58" height="42" rx="6" fill="#fff" stroke="#1c1c1c" stroke-width="3"/>
+          <rect class="core" x="240" y="412" width="42" height="12" rx="2" fill="#1c1c1c"/>
+          <circle class="core" cx="246" cy="436" r="4" fill="#c1272d"/>
+          <circle class="core" cx="260" cy="436" r="4" fill="#1c1c1c"/>
+          <circle class="core" cx="274" cy="436" r="4" fill="#1c1c1c"/>
+          <rect class="hitzone" x="226" y="398" width="72" height="56"/>
+        </g>
+
+        <!-- balín cayendo -->
+        <g class="part" data-name="Balín (cuerpo en caída)">
+          <circle class="core" cx="146" cy="205" r="11" fill="#3a3a3a" stroke="#1c1c1c" stroke-width="2.5"/>
+          <ellipse cx="142" cy="200" rx="4" ry="2.6" fill="#fff" opacity=".7"/>
+          <g stroke="#8a8a8a" stroke-width="2" stroke-linecap="round">
+            <line x1="146" y1="176" x2="146" y2="188"/><line x1="139" y1="179" x2="140" y2="189"/><line x1="153" y1="179" x2="152" y2="189"/>
+          </g>
+          <rect class="hitzone" x="128" y="170" width="38" height="50"/>
+        </g>
+
+        <!-- trayectoria vertical -->
+        <g class="part" data-name="Trayectoria vertical de caída">
+          <line class="core" x1="146" y1="96" x2="146" y2="438" stroke="#c1272d" stroke-width="2" stroke-dasharray="2 7" marker-end="url(#arr)"/>
+          <rect class="hitzone" x="140" y="230" width="14" height="200"/>
+        </g>
+
+        <!-- altura h -->
+        <g class="part" data-name="Altura h (distancia de caída)">
+          <line class="core" x1="92" y1="86" x2="92" y2="452" stroke="#1c1c1c" stroke-width="2.5" marker-start="url(#arr)" marker-end="url(#arr)"/>
+          <line x1="84" y1="86" x2="140" y2="86" stroke="#1c1c1c" stroke-width="1.6" stroke-dasharray="4 3"/>
+          <line x1="84" y1="452" x2="133" y2="452" stroke="#1c1c1c" stroke-width="1.6" stroke-dasharray="4 3"/>
+          <rect x="62" y="252" width="26" height="26" rx="6" fill="#fff" stroke="#c1272d" stroke-width="2.5"/>
+          <text x="75" y="271" text-anchor="middle" font-size="17" font-style="italic" font-family="Georgia, serif" fill="#c1272d">h</text>
+          <rect class="hitzone" x="58" y="86" width="40" height="370"/>
+        </g>
+
+        <!-- vector g -->
+        <g class="part" data-name="Aceleración de la gravedad g (hacia abajo)">
+          <line class="core" x1="292" y1="90" x2="292" y2="150" stroke="#1c1c1c" stroke-width="3.2" marker-end="url(#arr)"/>
+          <text x="304" y="126" font-size="17" font-style="italic" font-family="Georgia, serif" fill="#1c1c1c">g</text>
+          <rect class="hitzone" x="278" y="82" width="46" height="80"/>
+        </g>
+      </svg>
+    </div>
+    <div class="nota"><b>Así funciona:</b> el balín queda sujeto al imán del mecanismo de liberación. Al activarlo, el balín cae a lo largo de la torre y la unidad de control registra el tiempo transcurrido hasta el impacto en la base.</div>
+  </div>
+  <footer class="pf"><span>106012C – FÍSICA I + LABORATORIO | PRÁCTICA: CAÍDA LIBRE · Prof. María Leyes</span><span class="pnum"></span></footer>
+  </div>
+</section>
+
+<!-- ==================== 7 · PROCEDIMIENTO ==================== -->
+<section class="page" id="pg-procedimiento" data-title="Procedimiento">
+  <div class="sheet"><div class="content">
+    <div class="ph">Universidad del Valle — <b>Sede Cartago</b> · Laboratorio de Física I</div>
+    <h1 class="title"><span class="brush">PROCEDIMIENTO</span> experimental</h1>
+    <p class="subtitle">Sigue estos pasos en orden. La práctica se realiza con el montaje de la página anterior.</p>
+    <div class="steps">
+      <div class="step">
+        <h4>Ubica el sensor y registra la altura</h4>
+        <p>Coloca el sensor del instrumento a la altura que desees y <b>registra su valor</b> en la casilla <i>h</i> de la <b>Tabla 1</b>.</p>
+      </div>
+      <div class="step">
+        <h4>Coloca el balín y libéralo</h4>
+        <p>Pon el balín en el <b>imán</b> del instrumento y activa el mecanismo de liberación para que el balín caiga.</p>
+      </div>
+      <div class="step">
+        <h4>Mide el tiempo de caída (×3)</h4>
+        <p>Mide <b>tres veces</b> el tiempo de caída del balín y registra los tres valores en la Tabla 1.</p>
+      </div>
+      <div class="step">
+        <h4>Completa la Tabla 1</h4>
+        <p>Repite los pasos 2 y 3 hasta <b>completar la Tabla 1</b> con sus tres mediciones de tiempo.</p>
+      </div>
+      <div class="step">
+        <h4>Repite para cinco alturas más</h4>
+        <p>Repite todo el procedimiento para <b>5 alturas diferentes</b> y completa las <b>Tablas 2, 3, 4, 5 y 6</b>.</p>
+      </div>
+    </div>
+    <div class="nota"><b>Nota experimental:</b> elige las alturas de tal manera que el tiempo de caída del balín sea <b>diferente</b> en cada caso.</div>
+  </div>
+  <footer class="pf"><span>106012C – FÍSICA I + LABORATORIO | PRÁCTICA: CAÍDA LIBRE · Prof. María Leyes</span><span class="pnum"></span></footer>
+  </div>
+</section>
+
+<!-- ==================== 8–13 · TABLAS 1 A 6 (se generan por JS) ==================== -->
+<section class="page page-tabla" id="pg-tabla-1" data-title="Registro de datos – Tabla 1" data-tabla="1"></section>
+<section class="page page-tabla" id="pg-tabla-2" data-title="Registro de datos – Tabla 2" data-tabla="2"></section>
+<section class="page page-tabla" id="pg-tabla-3" data-title="Registro de datos – Tabla 3" data-tabla="3"></section>
+<section class="page page-tabla" id="pg-tabla-4" data-title="Registro de datos – Tabla 4" data-tabla="4"></section>
+<section class="page page-tabla" id="pg-tabla-5" data-title="Registro de datos – Tabla 5" data-tabla="5"></section>
+<section class="page page-tabla" id="pg-tabla-6" data-title="Registro de datos – Tabla 6" data-tabla="6"></section>
+
+<!-- ==================== 14 · ANÁLISIS DE RESULTADOS ==================== -->
+<section class="page" id="pg-analisis" data-title="Análisis de resultados">
+  <div class="sheet"><div class="content">
+    <div class="ph">Universidad del Valle — <b>Sede Cartago</b> · Laboratorio de Física I</div>
+    <h1 class="title">Análisis de <span class="rojo underline-red">resultados</span></h1>
+    <p class="subtitle">Observa tus parejas de datos altura – tiempo promedio antes de graficar.</p>
+    <div class="card">
+      <h3>Tus datos experimentales</h3>
+      <p>Cada barra representa una altura <i>h</i>; a la derecha aparece el tiempo promedio <span style="white-space:nowrap">t̄</span> con el que cayó el balín desde esa altura.</p>
+      <div class="mini-bars" id="miniBars"><p class="empty" style="color:#a99f8b; font-style:italic">Aún no hay datos completos. Llena las Tablas 1 a 6 para ver el resumen aquí.</p></div>
+    </div>
+    <div class="card">
+      <h3>Para pensar mientras observas</h3>
+      <ul>
+        <li>¿Qué le ocurre al tiempo de caída cuando la altura <b>aumenta</b>?</li>
+        <li>Si una altura es el <b>doble</b> de otra, ¿el tiempo también se duplica… o cambia de otra manera?</li>
+        <li>¿Los datos sugieren una relación en <b>línea recta</b> o una <b>curva</b>?</li>
+      </ul>
+    </div>
+  </div>
+  <footer class="pf"><span>106012C – FÍSICA I + LABORATORIO | PRÁCTICA: CAÍDA LIBRE · Prof. María Leyes</span><span class="pnum"></span></footer>
+  </div>
+</section>
+
+<!-- ==================== 15 · TABLA 7 ==================== -->
+<section class="page" id="pg-tabla7" data-title="Tabla de promedios – Tabla 7">
+  <div class="sheet"><div class="content">
+    <div class="ph">Universidad del Valle — <b>Sede Cartago</b> · Laboratorio de Física I</div>
+    <h1 class="title"><span class="brush">TABLA 7</span> · Resumen experimental</h1>
+    <p class="subtitle">Esta tabla se completa <b>automáticamente</b> con las alturas y los tiempos promedio de las Tablas 1 a 6. El promedio se calcula como:</p>
+    <div class="formula-box" style="max-width:340px">$$\bar{t}=\frac{t_1+t_2+t_3}{3}$$</div>
+    <div class="card">
+      <div class="tabla-wrap">
+        <table class="tabla" id="t7">
+          <thead><tr><th>Tabla</th><th>h (m)</th><th>t̄ (s)</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p style="margin-top:10px; font-size:.9rem; color:var(--gris)">Si alguna fila aparece vacía, regresa a la tabla correspondiente y completa la altura y las tres mediciones de tiempo.</p>
+    </div>
+  </div>
+  <footer class="pf"><span>106012C – FÍSICA I + LABORATORIO | PRÁCTICA: CAÍDA LIBRE · Prof. María Leyes</span><span class="pnum"></span></footer>
+  </div>
+</section>
+
+<!-- ==================== 16 · GRÁFICA ==================== -->
+<section class="page" id="pg-grafica" data-title="Gráfica altura vs. tiempo">
+  <div class="sheet"><div class="content">
+    <div class="ph">Universidad del Valle — <b>Sede Cartago</b> · Laboratorio de Física I</div>
+    <h1 class="title">Gráfica <span class="rojo underline-red">h vs. t̄</span></h1>
+    <p class="subtitle">Altura <i>h</i> (eje Y, en metros) en función del tiempo promedio t̄ (eje X, en segundos). La gráfica se actualiza sola cuando cambias tus datos.</p>
+    <div class="chart-box"><canvas id="chartHT" aria-label="Gráfica de altura contra tiempo promedio" height="300"></canvas></div>
+    <div class="fit-row" role="radiogroup" aria-label="Tipo de ajuste">
+      <b style="font-family:var(--f-hand)">Ajuste de los datos:</b>
+      <label><input type="radio" name="fitType" value="kt2" checked> h = k·t² <span style="color:var(--gris); font-size:.85rem">(modelo de caída libre)</span></label>
+      <label><input type="radio" name="fitType" value="quad"> h = A·t² + B·t + C</label>
+      <label><input type="radio" name="fitType" value="lin"> h = m·t + b <span style="color:var(--gris); font-size:.85rem">(recta, para comparar)</span></label>
+    </div>
+    <div class="eq-live" id="eqGrafica">Completa al menos <b>3 parejas (h, t̄)</b> en las tablas para calcular el ajuste.</div>
+  </div>
+  <footer class="pf"><span>106012C – FÍSICA I + LABORATORIO | PRÁCTICA: CAÍDA LIBRE · Prof. María Leyes</span><span class="pnum"></span></footer>
+  </div>
+</section>
+
+<!-- ==================== 17 · ECUACIÓN EXPERIMENTAL ==================== -->
+<section class="page" id="pg-ecuacion" data-title="Ecuación experimental">
+  <div class="sheet"><div class="content">
+    <div class="ph">Universidad del Valle — <b>Sede Cartago</b> · Laboratorio de Física I</div>
+    <h1 class="title">Ecuación <span class="rojo underline-red">experimental</span></h1>
+    <p class="subtitle">Esta es la ecuación obtenida a partir del ajuste de <b>tus</b> datos.</p>
+    <div class="card solid" style="text-align:center">
+      <h3>h = ecuación obtenida</h3>
+      <div id="eqExp" style="font-size:1.15rem; padding:6px 0">— completa tus tablas para obtenerla —</div>
+      <div id="eqExpR2"></div>
+    </div>
+    <div class="card">
+      <h3>¿Cómo se interpreta?</h3>
+      <p>Si el ajuste corresponde a una <b>relación cuadrática</b> (una parábola), significa que la altura recorrida crece con el <b>cuadrado del tiempo</b>, exactamente como predice el modelo de caída libre para un cuerpo que parte del reposo. El número que multiplica a <i>t²</i> (el <b>coeficiente cuadrático</b>) contiene la información sobre la aceleración del balín, como verás en la siguiente página.</p>
+      <p style="margin-top:8px">Observa también qué tan cerca pasan los puntos experimentales de la curva de ajuste: pequeñas separaciones son normales y provienen de la <b>incertidumbre experimental</b> de las mediciones.</p>
+    </div>
+  </div>
+  <footer class="pf"><span>106012C – FÍSICA I + LABORATORIO | PRÁCTICA: CAÍDA LIBRE · Prof. María Leyes</span><span class="pnum"></span></footer>
+  </div>
+</section>
+
+<!-- ==================== 18 · DETERMINACIÓN DE LA ACELERACIÓN ==================== -->
+<section class="page" id="pg-aceleracion" data-title="Determinación de la aceleración">
+  <div class="sheet"><div class="content">
+    <div class="ph">Universidad del Valle — <b>Sede Cartago</b> · Laboratorio de Física I</div>
+    <h1 class="title">Determinación de la <span class="rojo underline-red">aceleración</span></h1>
+    <p class="subtitle">Compara tu ecuación experimental con el modelo teórico y despeja <i>a</i>.</p>
+    <div class="steps" id="acelSteps">
+      <div class="step">
+        <h4>Modelo teórico de caída libre</h4>
+        <p>Para un cuerpo que parte del reposo:</p>
+        <div class="formula-box" style="max-width:280px; margin:8px auto 0">$$h=\frac{1}{2}\,a\,t^{2}$$</div>
+      </div>
+      <div class="step">
+        <h4>Tu ecuación experimental</h4>
+        <p id="acelPaso2">Aún no hay ecuación experimental. Completa tus tablas de datos.</p>
+      </div>
+      <div class="step">
+        <h4>Igualamos los coeficientes de t²</h4>
+        <p id="acelPaso3">Al comparar ambas expresiones, el coeficiente que acompaña a <i>t²</i> debe ser igual a ½·a. Es decir: <b>½·a = k</b>, de donde <b>a = 2k</b>.</p>
+      </div>
+      <div class="step">
+        <h4>Valor experimental de la aceleración</h4>
+        <div class="formula-box" style="max-width:360px; margin:8px auto 0"><span id="acelResultado">a = —</span></div>
+      </div>
+    </div>
+  </div>
+  <footer class="pf"><span>106012C – FÍSICA I + LABORATORIO | PRÁCTICA: CAÍDA LIBRE · Prof. María Leyes</span><span class="pnum"></span></footer>
+  </div>
+</section>
+
+<!-- ==================== 19 · COMPARACIÓN CON LA GRAVEDAD ==================== -->
+<section class="page" id="pg-comparacion" data-title="Comparación con la gravedad">
+  <div class="sheet"><div class="content">
+    <div class="ph">Universidad del Valle — <b>Sede Cartago</b> · Laboratorio de Física I</div>
+    <h1 class="title">Comparación con la <span class="rojo underline-red">gravedad</span></h1>
+    <p class="subtitle">¿Qué tan cerca quedó tu resultado del valor de referencia?</p>
+    <div class="card">
+      <div class="gref-line">
+        <span>Valor de referencia usado en el curso:</span>
+        <span>g =</span><input type="number" id="gRef" step="0.01" min="0" value="9.80" aria-label="Valor de referencia de la gravedad"><span>m/s²</span>
+      </div>
+    </div>
+    <div class="vs-grid">
+      <div class="vs-card">
+        <div class="lab">Aceleración experimental</div>
+        <div class="big" id="cmpAexp">—</div>
+        <div>m/s²</div>
+      </div>
+      <div class="vs-mid">VS</div>
+      <div class="vs-card">
+        <div class="lab">Aceleración de referencia</div>
+        <div class="big" id="cmpGref">9.80</div>
+        <div>m/s²</div>
+      </div>
+    </div>
+    <div class="card solid" id="cmpResumen">
+      <h3>Diferencia y error relativo</h3>
+      <p id="cmpTexto">Cuando tengas tu valor experimental, aquí verás la diferencia con el valor de referencia y el error relativo porcentual.</p>
+    </div>
+    <div class="nota"><b>Importante:</b> el valor experimental <u>no se reemplaza</u> por el teórico. El objetivo es compararlos y reflexionar sobre las posibles fuentes de la diferencia (medición del tiempo, de la altura, fricción con el aire, etc.).</div>
+  </div>
+  <footer class="pf"><span>106012C – FÍSICA I + LABORATORIO | PRÁCTICA: CAÍDA LIBRE · Prof. María Leyes</span><span class="pnum"></span></footer>
+  </div>
+</section>
+
+<!-- ==================== 20 · PREGUNTAS ==================== -->
+<section class="page" id="pg-preguntas" data-title="Preguntas de análisis">
+  <div class="sheet"><div class="content">
+    <div class="ph">Universidad del Valle — <b>Sede Cartago</b> · Laboratorio de Física I</div>
+    <h1 class="title"><span class="brush">PREGUNTAS</span> de análisis</h1>
+    <p class="subtitle">Responde con tus propias palabras, apoyándote en tu gráfica y tus datos. Tus respuestas se guardan automáticamente.</p>
+    <div class="card">
+      <h3><span class="tagnum">1</span> Tipo de función</h3>
+      <p>De acuerdo con la gráfica obtenida, ¿qué tipo de función relaciona la altura con el tiempo?</p>
+      <textarea class="resp" id="resp1" placeholder="Escribe aquí tu respuesta…"></textarea>
+    </div>
+    <div class="card">
+      <h3><span class="tagnum">2</span> Una constante conocida</h3>
+      <p>¿El valor obtenido para la aceleración se parece a alguna constante conocida? En caso afirmativo, ¿a cuál constante se parece?</p>
+      <textarea class="resp" id="resp2" placeholder="Escribe aquí tu respuesta…"></textarea>
+    </div>
+    <div class="card">
+      <h3><span class="tagnum">3</span> Tipo de movimiento</h3>
+      <p>De acuerdo con los datos obtenidos, ¿qué tipo de movimiento describe el balín?</p>
+      <textarea class="resp" id="resp3" placeholder="Escribe aquí tu respuesta…"></textarea>
+    </div>
+  </div>
+  <footer class="pf"><span>106012C – FÍSICA I + LABORATORIO | PRÁCTICA: CAÍDA LIBRE · Prof. María Leyes</span><span class="pnum"></span></footer>
+  </div>
+</section>
+
+<!-- ==================== 21 · CONCLUSIONES ==================== -->
+<section class="page" id="pg-conclusiones" data-title="Conclusiones">
+  <div class="sheet"><div class="content">
+    <div class="ph">Universidad del Valle — <b>Sede Cartago</b> · Laboratorio de Física I</div>
+    <h1 class="title"><span class="brush">CONCLUSIONES</span></h1>
+    <p class="subtitle">Escribe tres conclusiones sobre la práctica, con tus propias palabras.</p>
+    <div class="hint-chips">
+      <span class="chip">✔ Datos experimentales</span>
+      <span class="chip">✔ Relación altura–tiempo</span>
+      <span class="chip">✔ Aceleración obtenida</span>
+      <span class="chip">✔ Comportamiento del movimiento</span>
+    </div>
+    <div class="card">
+      <h3><span class="tagnum">1</span> Conclusión 1</h3>
+      <textarea class="resp" id="conc1" placeholder="Escribe aquí tu primera conclusión…"></textarea>
+    </div>
+    <div class="card">
+      <h3><span class="tagnum">2</span> Conclusión 2</h3>
+      <textarea class="resp" id="conc2" placeholder="Escribe aquí tu segunda conclusión…"></textarea>
+    </div>
+    <div class="card">
+      <h3><span class="tagnum">3</span> Conclusión 3</h3>
+      <textarea class="resp" id="conc3" placeholder="Escribe aquí tu tercera conclusión…"></textarea>
+    </div>
+  </div>
+  <footer class="pf"><span>106012C – FÍSICA I + LABORATORIO | PRÁCTICA: CAÍDA LIBRE · Prof. María Leyes</span><span class="pnum"></span></footer>
+  </div>
+</section>
+
+<!-- ==================== 22 · GLOSARIO ==================== -->
+<section class="page" id="pg-glosario" data-title="Glosario">
+  <div class="sheet"><div class="content">
+    <div class="ph">Universidad del Valle — <b>Sede Cartago</b> · Laboratorio de Física I</div>
+    <h1 class="title"><span class="brush">GLOSARIO</span> de la práctica</h1>
+    <p class="subtitle">Toca cada término para ver su significado.</p>
+    <div class="glos-grid" id="glosGrid"></div>
+  </div>
+  <footer class="pf"><span>106012C – FÍSICA I + LABORATORIO | PRÁCTICA: CAÍDA LIBRE · Prof. María Leyes</span><span class="pnum"></span></footer>
+  </div>
+</section>
+
+<!-- ==================== 23 · REFERENCIAS ==================== -->
+<section class="page" id="pg-referencias" data-title="Referencias">
+  <div class="sheet"><div class="content">
+    <div class="ph">Universidad del Valle — <b>Sede Cartago</b> · Laboratorio de Física I</div>
+    <h1 class="title"><span class="brush">REFERENCIAS</span></h1>
+    <p class="subtitle">Material de apoyo de la práctica.</p>
+    <div class="card">
+      <ul style="display:grid; gap:10px; list-style:none; padding-left:0">
+        <li>📄 <b>Guía de laboratorio.</b> <i>Informe 4 – Caída Libre.</i> Departamento de Física, Laboratorio de Física I. (Documento de referencia principal de esta práctica).</li>
+        <li>📘 Serway, R. A. y Jewett, J. W. <i>Física para ciencias e ingeniería</i>, Vol. 1. Cengage Learning. Capítulo de cinemática en una dimensión: caída libre.</li>
+        <li>📘 Sears, F. W., Zemansky, M. W., Young, H. D. y Freedman, R. A. <i>Física universitaria</i>, Vol. 1. Pearson. Movimiento rectilíneo con aceleración constante.</li>
+        <li>💻 Cuaderno interactivo desarrollado para la asignatura <b>106012C – Física I + Laboratorio</b>, Universidad del Valle, Sede Cartago. Profesora: María Leyes.</li>
+      </ul>
+    </div>
+    <div class="card solid" style="text-align:center">
+      <h3>🎉 ¡Fin del cuaderno!</h3>
+      <p>Revisa que todas tus tablas, respuestas y conclusiones estén completas. Tu trabajo queda guardado en este navegador.</p>
+      <div class="btn-row" style="justify-content:center">
+        <button class="btn rojo" data-goto="1">Volver al índice</button>
+        <button class="btn" data-goto="0">Ir a la portada</button>
+      </div>
+    </div>
+  </div>
+  <footer class="pf"><span>106012C – FÍSICA I + LABORATORIO | PRÁCTICA: CAÍDA LIBRE · Prof. María Leyes</span><span class="pnum"></span></footer>
+  </div>
+</section>
+
+</main>
+
+<!-- ==================== NAVEGACIÓN ==================== -->
+<nav id="nav" aria-label="Navegación del cuaderno">
+  <div class="inner">
+    <button class="btn mini" id="btnHome" title="Portada" aria-label="Ir a la portada">⌂</button>
+    <button class="btn mini" id="btnIndex" title="Índice" aria-label="Ir al índice">☰ Índice</button>
+    <button class="btn mini" id="btnPrev" aria-label="Página anterior">‹ Anterior</button>
+    <span id="pageLabel">Página <b>1</b> / 1</span>
+    <button class="btn mini" id="btnNext" aria-label="Página siguiente">Siguiente ›</button>
+    <button class="btn mini rojo" id="btnMenu" aria-label="Abrir menú de secciones">☰</button>
+  </div>
+</nav>
+
+<div id="menuOverlay"></div>
+<aside id="menu" aria-label="Menú de secciones">
+  <header>
+    <div class="t">CUADERNO <span style="color:var(--rojo)">INTERACTIVO</span></div>
+    <div class="s">Caída Libre · 106012C · Prof. María Leyes</div>
+  </header>
+  <nav id="menuList"></nav>
+  <footer>
+    <button class="btn mini rojo" id="btnAutoFill">🎲 Autocompletar Tablas 1–6 (datos de ejemplo)</button>
+    <button class="btn mini" id="btnResetAll">🗑 Reiniciar todo el cuaderno</button>
+  </footer>
+</aside>
+
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+/* ============================================================
+   CUADERNO INTERACTIVO — CAÍDA LIBRE
+   Universidad del Valle, Sede Cartago · 106012C · Prof. María Leyes
+   ============================================================ */
+(function(){
+"use strict";
+
+/* ---------- Utilidades ---------- */
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const fmt = (x,d=3) => (isFinite(x) ? Number(x).toFixed(d) : "—");
+
+function safeTypeset(el){
+  if (window.MathJax && MathJax.typesetPromise){
+    return MathJax.typesetPromise(el ? [el] : undefined).catch(()=>{});
+  }
+  return new Promise(r => setTimeout(() => safeTypeset(el).then(r), 500));
+}
+
+let toastTimer=null;
+function toast(msg, tipo="ok"){
+  const t=$("#toast");
+  t.textContent=msg; t.className="show "+tipo;
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{t.className="";},2200);
+}
+
+/* ---------- Estado + LocalStorage ---------- */
+const LS_KEY="cuaderno_caida_libre_univalle_v1";
+const defaultState = () => ({
+  tablas: Array.from({length:6}, ()=>({h:"", t:["","",""]})),
+  resp:{r1:"",r2:"",r3:""},
+  conc:{c1:"",c2:"",c3:""},
+  gref:"9.80",
+  fit:"kt2",
+  page:0
+});
+let state = defaultState();
+try{
+  const raw = localStorage.getItem(LS_KEY);
+  if(raw){ const s=JSON.parse(raw); state = Object.assign(defaultState(), s);
+    if(!Array.isArray(state.tablas)||state.tablas.length!==6) state.tablas=defaultState().tablas; }
+}catch(e){ state = defaultState(); }
+
+let saveTimer=null;
+function save(silent=true){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
+    if(!silent) toast("Datos guardados en este navegador ✓");
+  }, silent?250:0);
+}
+
+/* ---------- Secciones y navegación ---------- */
+const pages = $$(".page");
+const INDEX_START = 2; // la sección 1 del índice corresponde a pages[2]
+
+function buildIndexAndMenu(){
+  const grid=$("#indexGrid"), menu=$("#menuList");
+  pages.forEach((p,i)=>{
+    // Menú lateral: todas las páginas
+    const mb=document.createElement("button");
+    mb.innerHTML = '<span class="mn">'+(i===0?"⌂":i)+'</span><span>'+p.dataset.title+'</span>';
+    mb.addEventListener("click",()=>{ goTo(i); toggleMenu(false); });
+    menu.appendChild(mb);
+    // Índice del cuaderno: secciones 1..20 (desde Presentación)
+    if(i>=INDEX_START){
+      const b=document.createElement("button");
+      b.className="index-item";
+      b.innerHTML='<span class="n">'+(i-INDEX_START+1)+'</span><span>'+p.dataset.title+'</span>';
+      b.addEventListener("click",()=>goTo(i));
+      grid.appendChild(b);
+    }
+  });
+}
+
+function goTo(i){
+  i=Math.max(0,Math.min(pages.length-1,i));
+  pages.forEach((p,k)=>p.classList.toggle("active",k===i));
+  state.page=i; save();
+  $("#progress").style.width = (i/(pages.length-1)*100)+"%";
+  $("#pageLabel").innerHTML = 'Página <b>'+(i+1)+'</b> / '+pages.length+' · <span style="color:var(--gris)">'+pages[i].dataset.title+'</span>';
+  $$("#menuList button").forEach((b,k)=>b.classList.toggle("cur",k===i));
+  $$(".pnum").forEach(el=>{ const pg=el.closest(".page"); if(pg) el.textContent = pages.indexOf(pg)+1; });
+  window.scrollTo({top:0, behavior:"smooth"});
+  if(pages[i].id==="pg-grafica"){ ensureChart(); updateAll(); }
+  if(["pg-tabla7","pg-analisis","pg-ecuacion","pg-aceleracion","pg-comparacion"].includes(pages[i].id)) updateAll();
+  if(pages[i].id==="pg-fundamento") sim.reset();
+  safeTypeset(pages[i]);
+}
+
+$("#btnPrev").addEventListener("click",()=>goTo(state.page-1));
+$("#btnNext").addEventListener("click",()=>goTo(state.page+1));
+$("#btnHome").addEventListener("click",()=>goTo(0));
+$("#btnIndex").addEventListener("click",()=>goTo(1));
+document.addEventListener("keydown",e=>{
+  const tag=(document.activeElement&&document.activeElement.tagName)||"";
+  if(tag==="INPUT"||tag==="TEXTAREA") return;
+  if(e.key==="ArrowRight") goTo(state.page+1);
+  if(e.key==="ArrowLeft")  goTo(state.page-1);
+});
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-goto]");
+  if(b) goTo(parseInt(b.dataset.goto,10));
+});
+
+/* Menú lateral */
+function toggleMenu(open){
+  $("#menu").classList.toggle("open",open);
+  $("#menuOverlay").classList.toggle("show",open);
+}
+$("#btnMenu").addEventListener("click",()=>toggleMenu(true));
+$("#menuOverlay").addEventListener("click",()=>toggleMenu(false));
+$("#btnResetAll").addEventListener("click",()=>{
+  if(confirm("¿Seguro que quieres borrar TODOS los datos, respuestas y conclusiones del cuaderno? Esta acción no se puede deshacer.")){
+    state=defaultState(); localStorage.removeItem(LS_KEY);
+    fillInputsFromState(); updateAll(); toggleMenu(false); goTo(0);
+    toast("Cuaderno reiniciado","warn");
+  }
+});
+
+/* ---------- Autocompletar Tablas 1–6 con datos de ejemplo ---------- */
+function autoFillAll(){
+  const hayDatos = state.tablas.some(T=>T.h!=="" || T.t.some(v=>v!==""));
+  if(hayDatos && !confirm("Se completarán automáticamente las Tablas 1 a 6 con datos experimentales de ejemplo.\nLos valores actuales de las tablas se sobrescribirán. ¿Continuar?")) return;
+  const G=9.8;
+  const alturas=[0.30,0.60,0.90,1.20,1.50,1.80];
+  alturas.forEach((h,i)=>{
+    const tIdeal=Math.sqrt(2*h/G);
+    state.tablas[i].h=h.toFixed(2);
+    // Tres mediciones con dispersión experimental realista (~±1.5 %)
+    state.tablas[i].t=[0,1,2].map(()=>{
+      const ruido=1+(Math.random()-0.5)*0.03;
+      return (tIdeal*ruido).toFixed(3);
+    });
+  });
+  fillInputsFromState(); save(); updateAll();
+  for(let n=1;n<=6;n++) renderProm(n,true);
+  toggleMenu(false);
+  const iT1=pages.findIndex(p=>p.id==="pg-tabla-1");
+  if(state.page<iT1 || state.page>iT1+5) goTo(iT1);
+  toast("Tablas 1–6 completadas con datos de ejemplo ✓");
+}
+$("#btnAutoFill").addEventListener("click",autoFillAll);
+
+/* ---------- Páginas de tablas 1–6 ---------- */
+function tablePageHTML(n){
+  return `
+  <div class="sheet"><div class="content">
+    <div class="ph">Universidad del Valle — <b>Sede Cartago</b> · Laboratorio de Física I</div>
+    <h1 class="title">Registro de datos · <span class="brush">TABLA ${n}</span></h1>
+    <p class="subtitle">Altura N.° ${n} de 6 — escribe la altura elegida y las tres mediciones del tiempo de caída.</p>
+    <div class="card">
+      <div class="h-line"><span>h =</span>
+        <input type="number" step="0.01" min="0" inputmode="decimal" data-t="${n}" data-campo="h" aria-label="Altura de la tabla ${n} en metros" placeholder="0.00">
+        <span>m</span>
+      </div>
+      <div class="tabla-wrap">
+        <table class="tabla">
+          <thead><tr><th>Dato No.</th><th>t (s)</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><input type="number" step="0.001" min="0" inputmode="decimal" data-t="${n}" data-campo="0" aria-label="Tiempo 1 de la tabla ${n}" placeholder="0.000"></td></tr>
+            <tr><td>2</td><td><input type="number" step="0.001" min="0" inputmode="decimal" data-t="${n}" data-campo="1" aria-label="Tiempo 2 de la tabla ${n}" placeholder="0.000"></td></tr>
+            <tr><td>3</td><td><input type="number" step="0.001" min="0" inputmode="decimal" data-t="${n}" data-campo="2" aria-label="Tiempo 3 de la tabla ${n}" placeholder="0.000"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="btn-row">
+        <button class="btn rojo" data-accion="prom" data-t="${n}">∑ Calcular promedio</button>
+        <button class="btn" data-accion="guardar" data-t="${n}">💾 Guardar datos</button>
+        <button class="btn" data-accion="limpiar" data-t="${n}">🧹 Limpiar tabla</button>
+        <button class="btn" data-accion="autofill" title="Completa automáticamente las Tablas 1 a 6 con datos de ejemplo">🎲 Autocompletar todas</button>
+      </div>
+      <div class="prom-box" id="prom-${n}"></div>
+    </div>
+    <div class="nota"><b>Sugerencia:</b> escribe los tiempos con tres cifras decimales (por ejemplo 0.452 s). Los datos se guardan automáticamente y puedes modificarlos cuando quieras.</div>
+  </div>
+  <footer class="pf"><span>106012C – FÍSICA I + LABORATORIO | PRÁCTICA: CAÍDA LIBRE · Prof. María Leyes</span><span class="pnum"></span></footer>
+  </div>`;
+}
+$$(".page-tabla").forEach(sec=>{ sec.innerHTML = tablePageHTML(parseInt(sec.dataset.tabla,10)); });
+
+/* Entrada de datos: validación numérica + autosave */
+function fillInputsFromState(){
+  $$('input[data-t]').forEach(inp=>{
+    const n=parseInt(inp.dataset.t,10)-1, c=inp.dataset.campo;
+    inp.value = (c==="h") ? state.tablas[n].h : state.tablas[n].t[parseInt(c,10)];
+    inp.classList.remove("bad");
+  });
+  $("#resp1").value=state.resp.r1; $("#resp2").value=state.resp.r2; $("#resp3").value=state.resp.r3;
+  $("#conc1").value=state.conc.c1; $("#conc2").value=state.conc.c2; $("#conc3").value=state.conc.c3;
+  $("#gRef").value=state.gref;
+  const fr=document.querySelector('input[name="fitType"][value="'+state.fit+'"]'); if(fr) fr.checked=true;
+}
+
+document.addEventListener("input",e=>{
+  const inp=e.target;
+  if(inp.matches('input[data-t]')){
+    const n=parseInt(inp.dataset.t,10)-1, c=inp.dataset.campo, v=inp.value.trim();
+    const num=parseFloat(v);
+    const valido = v==="" || (isFinite(num) && num>=0);
+    inp.classList.toggle("bad", !valido);
+    if(c==="h") state.tablas[n].h = valido? v : state.tablas[n].h;
+    else if(valido) state.tablas[n].t[parseInt(c,10)] = v;
+    save(); updateAll(); renderProm(n+1,false);
+  }
+});
+
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-accion]");
+  if(!b) return;
+  if(b.dataset.accion==="autofill"){ autoFillAll(); return; }
+  const n=parseInt(b.dataset.t,10);
+  if(b.dataset.accion==="prom"){ renderProm(n,true); }
+  if(b.dataset.accion==="guardar"){ save(false); }
+  if(b.dataset.accion==="limpiar"){
+    if(confirm("¿Limpiar la Tabla "+n+"? Se borrarán la altura y los tres tiempos.")){
+      state.tablas[n-1]={h:"",t:["","",""]};
+      fillInputsFromState(); save(); updateAll();
+      $("#prom-"+n).classList.remove("show");
+      toast("Tabla "+n+" limpia","warn");
+    }
+  }
+});
+
+/* ---------- Promedios (mostrando el procedimiento) ---------- */
+function datosTabla(n){
+  const T=state.tablas[n-1];
+  const h=parseFloat(T.h);
+  const ts=T.t.map(parseFloat);
+  const okT = ts.every(x=>isFinite(x)&&x>=0);
+  const okH = isFinite(h)&&h>0;
+  const prom = okT ? (ts[0]+ts[1]+ts[2])/3 : NaN;
+  return {h, ts, prom, okT, okH, completa: okT&&okH};
+}
+
+function renderProm(n, force){
+  const box=$("#prom-"+n); if(!box) return;
+  const d=datosTabla(n);
+  if(!d.okT){
+    if(force){ box.classList.add("show");
+      box.innerHTML="Faltan mediciones: escribe los <b>tres tiempos</b> para calcular el promedio."; }
+    return;
+  }
+  const suma=d.ts[0]+d.ts[1]+d.ts[2];
+  box.classList.add("show");
+  box.innerHTML =
+    '<b>Cálculo del tiempo promedio:</b><br>'+
+    't₁ + t₂ + t₃ = '+fmt(d.ts[0])+' s + '+fmt(d.ts[1])+' s + '+fmt(d.ts[2])+' s = <b>'+fmt(suma)+' s</b><br>'+
+    'Dividido entre <b>3</b>:<br>'+
+    '<span class="res">t̄ = '+fmt(suma)+' / 3 = '+fmt(d.prom)+' s</span>'+
+    (d.okH?'' : '<br><span style="color:var(--rojo-osc)">Recuerda registrar también la altura h.</span>');
+}
+
+/* ---------- Datos válidos (h, t̄) ---------- */
+function paresValidos(){
+  const pares=[];
+  for(let n=1;n<=6;n++){ const d=datosTabla(n); if(d.completa) pares.push({tabla:n, h:d.h, t:d.prom}); }
+  return pares;
+}
+
+/* ---------- Tabla 7 + barras de análisis ---------- */
+function renderTabla7(){
+  const tb=$("#t7 tbody"); tb.innerHTML="";
+  for(let n=1;n<=6;n++){
+    const d=datosTabla(n);
+    const tr=document.createElement("tr");
+    tr.innerHTML='<td>'+n+'</td>'+
+      '<td class="'+(d.okH?'autoval':'empty')+'">'+(d.okH?fmt(d.h,2):'pendiente')+'</td>'+
+      '<td class="'+(d.okT?'autoval':'empty')+'">'+(d.okT?fmt(d.prom):'pendiente')+'</td>';
+    tb.appendChild(tr);
+  }
+}
+function renderMiniBars(){
+  const box=$("#miniBars"); const pares=paresValidos();
+  if(pares.length===0){
+    box.innerHTML='<p style="color:#a99f8b; font-style:italic">Aún no hay datos completos. Llena las Tablas 1 a 6 para ver el resumen aquí.</p>';
+    return;
+  }
+  const hMax=Math.max(...pares.map(p=>p.h));
+  box.innerHTML = pares.map(p=>
+    '<div class="mini-bar"><span class="lab">Tabla '+p.tabla+'</span>'+
+    '<div class="bar" style="width:'+Math.max(4,(p.h/hMax*100))+'%"></div>'+
+    '<span>h='+fmt(p.h,2)+' m · t̄='+fmt(p.t)+' s</span></div>'
+  ).join("");
+}
+
+/* ---------- Ajustes por mínimos cuadrados ---------- */
+function fitKT2(P){ // h = k t^2 (a través del origen)
+  let s1=0,s2=0; P.forEach(p=>{ s1+=p.h*p.t*p.t; s2+=Math.pow(p.t,4); });
+  const k=s1/s2;
+  return {tipo:"kt2", k, f:t=>k*t*t};
+}
+function fitLin(P){ // h = m t + b
+  const n=P.length; let sx=0,sy=0,sxx=0,sxy=0;
+  P.forEach(p=>{sx+=p.t; sy+=p.h; sxx+=p.t*p.t; sxy+=p.t*p.h;});
+  const m=(n*sxy-sx*sy)/(n*sxx-sx*sx), b=(sy-m*sx)/n;
+  return {tipo:"lin", m, b, f:t=>m*t+b};
+}
+function fitQuad(P){ // h = A t^2 + B t + C — ecuaciones normales 3x3 (Cramer)
+  let n=P.length,s1=0,s2=0,s3=0,s4=0,sy=0,sty=0,st2y=0;
+  P.forEach(p=>{const t=p.t; s1+=t; s2+=t*t; s3+=t*t*t; s4+=t*t*t*t;
+    sy+=p.h; sty+=t*p.h; st2y+=t*t*p.h;});
+  const M=[[s4,s3,s2],[s3,s2,s1],[s2,s1,n]], V=[st2y,sty,sy];
+  const det=m3(M);
+  if(Math.abs(det)<1e-12) return null;
+  const A=m3(rep(M,0,V))/det, B=m3(rep(M,1,V))/det, C=m3(rep(M,2,V))/det;
+  return {tipo:"quad", A,B,C, f:t=>A*t*t+B*t+C};
+  function m3(m){return m[0][0]*(m[1][1]*m[2][2]-m[1][2]*m[2][1])
+    -m[0][1]*(m[1][0]*m[2][2]-m[1][2]*m[2][0])
+    +m[0][2]*(m[1][0]*m[2][1]-m[1][1]*m[2][0]);}
+  function rep(m,c,v){return m.map((row,i)=>row.map((x,j)=>j===c?v[i]:x));}
+}
+function r2(P,f){
+  const ym=P.reduce((s,p)=>s+p.h,0)/P.length;
+  let ssr=0,sst=0;
+  P.forEach(p=>{ssr+=Math.pow(p.h-f(p.t),2); sst+=Math.pow(p.h-ym,2);});
+  return sst>0 ? 1-ssr/sst : 1;
+}
+function ajusteActual(P){
+  if(P.length<3) return null;
+  let fit=null;
+  if(state.fit==="kt2") fit=fitKT2(P);
+  else if(state.fit==="lin") fit=fitLin(P);
+  else fit=fitQuad(P)||fitKT2(P);
+  if(fit) fit.R2=r2(P,fit.f);
+  return fit;
+}
+function eqTexto(fit){
+  if(!fit) return "";
+  if(fit.tipo==="kt2")  return "h = "+fmt(fit.k)+"·t²";
+  if(fit.tipo==="lin")  return "h = "+fmt(fit.m)+"·t "+(fit.b>=0?"+ ":"− ")+fmt(Math.abs(fit.b));
+  return "h = "+fmt(fit.A)+"·t² "+(fit.B>=0?"+ ":"− ")+fmt(Math.abs(fit.B))+"·t "+(fit.C>=0?"+ ":"− ")+fmt(Math.abs(fit.C));
+}
+function eqTeX(fit){
+  if(!fit) return "";
+  if(fit.tipo==="kt2")  return "$$h = "+fmt(fit.k)+"\\,t^{2}$$";
+  if(fit.tipo==="lin")  return "$$h = "+fmt(fit.m)+"\\,t "+(fit.b>=0?"+":"-")+" "+fmt(Math.abs(fit.b))+"$$";
+  return "$$h = "+fmt(fit.A)+"\\,t^{2} "+(fit.B>=0?"+":"-")+" "+fmt(Math.abs(fit.B))+"\\,t "+(fit.C>=0?"+":"-")+" "+fmt(Math.abs(fit.C))+"$$";
+}
+function coefCuadratico(fit){
+  if(!fit) return NaN;
+  if(fit.tipo==="kt2") return fit.k;
+  if(fit.tipo==="quad") return fit.A;
+  return NaN; // el ajuste lineal no permite obtener a
+}
+
+/* ---------- Gráfica (Chart.js) ---------- */
+let chart=null;
+function ensureChart(){
+  if(chart || !window.Chart) return;
+  const ctx=$("#chartHT").getContext("2d");
+  chart=new Chart(ctx,{
+    type:"scatter",
+    data:{datasets:[
+      {label:"Datos experimentales (h, t̄)", data:[], backgroundColor:"#c1272d",
+       borderColor:"#1c1c1c", borderWidth:1.5, pointRadius:6, pointHoverRadius:8, pointStyle:"circle"},
+      {label:"Curva de ajuste", data:[], type:"line", borderColor:"#1c1c1c",
+       borderWidth:2.5, borderDash:[7,5], pointRadius:0, fill:false, tension:0}
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:"nearest", intersect:false},
+      plugins:{
+        legend:{labels:{font:{family:"'Patrick Hand', cursive", size:14}, color:"#1c1c1c"}},
+        tooltip:{callbacks:{label:c=>" t̄ = "+fmt(c.parsed.x)+" s ,  h = "+fmt(c.parsed.y,2)+" m"}}
+      },
+      scales:{
+        x:{title:{display:true, text:"Tiempo promedio  t̄  (s)", font:{family:"'Patrick Hand', cursive", size:15}, color:"#1c1c1c"},
+           grid:{color:"#eee2d8"}, ticks:{color:"#444"}, beginAtZero:true},
+        y:{title:{display:true, text:"Altura  h  (m)", font:{family:"'Patrick Hand', cursive", size:15}, color:"#1c1c1c"},
+           grid:{color:"#eee2d8"}, ticks:{color:"#444"}, beginAtZero:true}
+      }
+    }
+  });
+  $("#chartHT").parentElement.style.height="320px";
+}
+function renderChart(P,fit){
+  if(!chart) return;
+  chart.data.datasets[0].data = P.map(p=>({x:p.t, y:p.h}));
+  if(fit && P.length>=3){
+    const tMax=Math.max(...P.map(p=>p.t))*1.12;
+    const curva=[]; for(let i=0;i<=48;i++){const t=tMax*i/48; curva.push({x:t, y:fit.f(t)});}
+    chart.data.datasets[1].data=curva;
+    chart.data.datasets[1].label="Ajuste: "+eqTexto(fit);
+  } else { chart.data.datasets[1].data=[]; chart.data.datasets[1].label="Curva de ajuste"; }
+  chart.update();
+}
+
+/* ---------- Actualización global de páginas derivadas ---------- */
+function updateAll(){
+  const P=paresValidos();
+  const fit=ajusteActual(P);
+  renderTabla7();
+  renderMiniBars();
+  renderChart(P,fit);
+
+  // Ecuación en página de gráfica
+  const eg=$("#eqGrafica");
+  if(P.length<3){
+    eg.innerHTML='Completa al menos <b>3 parejas (h, t̄)</b> en las tablas para calcular el ajuste. Llevas <b>'+P.length+'</b> de 6.';
+  } else {
+    eg.innerHTML='<b>Ecuación del ajuste ('+P.length+' puntos):</b> &nbsp; '+eqTexto(fit)+
+      ' &nbsp; <span class="badge-r2">R² = '+fmt(fit.R2,4)+'</span>';
+  }
+
+  // Página ecuación experimental
+  const ee=$("#eqExp"), er=$("#eqExpR2");
+  if(fit){
+    ee.innerHTML=eqTeX(fit);
+    er.innerHTML='<span class="badge-r2">Calidad del ajuste: R² = '+fmt(fit.R2,4)+'</span>'+
+      '<p style="font-size:.88rem; color:var(--gris); margin-top:6px">Con h en metros y t en segundos. Ajuste sobre '+P.length+' parejas de datos.</p>';
+    safeTypeset($("#pg-ecuacion"));
+  } else {
+    ee.textContent="— completa tus tablas para obtenerla —"; er.innerHTML="";
+  }
+
+  // Página aceleración
+  const p2=$("#acelPaso2"), p3=$("#acelPaso3"), res=$("#acelResultado");
+  const k=coefCuadratico(fit);
+  if(fit && isFinite(k)){
+    const a=2*k;
+    if(fit.tipo==="kt2"){
+      p2.innerHTML='Tu ajuste dio: <b>h = '+fmt(k)+'·t²</b>, es decir, el coeficiente experimental de t² es <b>k = '+fmt(k)+' m/s²</b>.';
+      p3.innerHTML='Comparando: &nbsp; ½·a·t² = k·t² &nbsp;⟹&nbsp; ½·a = '+fmt(k)+' &nbsp;⟹&nbsp; <b>a = 2 × '+fmt(k)+'</b>';
+    } else {
+      p2.innerHTML='Tu ajuste dio: <b>'+eqTexto(fit)+'</b>. El coeficiente que acompaña a t² es <b>A = '+fmt(fit.A)+' m/s²</b> (los términos en t y constante deberían ser pequeños si el balín partió del reposo).';
+      p3.innerHTML='Comparando el término cuadrático: &nbsp; ½·a = A = '+fmt(fit.A)+' &nbsp;⟹&nbsp; <b>a = 2 × '+fmt(fit.A)+'</b>';
+    }
+    res.innerHTML='a = <b style="color:var(--rojo-osc)">'+fmt(a,2)+' m/s²</b>';
+    // Comparación
+    $("#cmpAexp").textContent=fmt(a,2);
+    const g=parseFloat(state.gref);
+    $("#cmpGref").textContent=isFinite(g)?fmt(g,2):"—";
+    if(isFinite(g)&&g>0){
+      const dif=a-g, err=Math.abs(dif)/g*100;
+      $("#cmpTexto").innerHTML=
+        'Diferencia: a<sub>exp</sub> − g = '+fmt(a,2)+' − '+fmt(g,2)+' = <b>'+fmt(dif,2)+' m/s²</b><br>'+
+        'Error relativo: |'+fmt(dif,2)+'| / '+fmt(g,2)+' × 100 % = <b style="color:var(--rojo-osc); font-family:var(--f-hand); font-size:1.2rem">'+fmt(err,1)+' %</b><br>'+
+        (err<=5 ? '✔ Tu valor experimental es <b>muy cercano</b> al de referencia: la aceleración del balín se parece a la aceleración de la gravedad.'
+                : 'Tu valor difiere del de referencia. Reflexiona: ¿qué fuentes de error experimental pudieron influir (medición del tiempo, de la altura, resistencia del aire…)?');
+    } else {
+      $("#cmpTexto").textContent="Escribe un valor de referencia válido para g.";
+    }
+  } else if(fit && fit.tipo==="lin"){
+    p2.innerHTML='Tu ajuste actual es una <b>recta</b>: '+eqTexto(fit)+'. Una recta no contiene término en t², así que no permite despejar la aceleración con el modelo h = ½·a·t².';
+    p3.innerHTML='Vuelve a la página de la gráfica y selecciona un ajuste <b>cuadrático</b> (h = k·t² o h = A·t² + B·t + C) para determinar a. Observa además con cuál ajuste el R² es mayor.';
+    res.innerHTML='a = — <span style="font-size:.8rem">(requiere ajuste cuadrático)</span>';
+    $("#cmpAexp").textContent="—"; $("#cmpTexto").textContent="Selecciona un ajuste cuadrático en la página de la gráfica para poder comparar.";
+  } else {
+    p2.textContent="Aún no hay ecuación experimental. Completa tus tablas de datos.";
+    p3.innerHTML='Al comparar ambas expresiones, el coeficiente que acompaña a <i>t²</i> debe ser igual a ½·a. Es decir: <b>½·a = k</b>, de donde <b>a = 2k</b>.';
+    res.innerHTML="a = —";
+    $("#cmpAexp").textContent="—";
+    $("#cmpTexto").textContent="Cuando tengas tu valor experimental, aquí verás la diferencia con el valor de referencia y el error relativo porcentual.";
+  }
+}
+
+/* Selector de ajuste y g de referencia */
+$$('input[name="fitType"]').forEach(r=>r.addEventListener("change",()=>{
+  state.fit=r.value; save(); updateAll();
+}));
+$("#gRef").addEventListener("input",()=>{ state.gref=$("#gRef").value; save(); updateAll(); });
+
+/* ---------- Respuestas y conclusiones ---------- */
+[["resp1","resp","r1"],["resp2","resp","r2"],["resp3","resp","r3"],
+ ["conc1","conc","c1"],["conc2","conc","c2"],["conc3","conc","c3"]].forEach(([id,g,k])=>{
+  $("#"+id).addEventListener("input",e=>{ state[g][k]=e.target.value; save(); });
+});
+
+/* ---------- Glosario ---------- */
+const GLOSARIO=[
+ ["Caída libre","Movimiento de un cuerpo sobre el que actúa únicamente la gravedad (se desprecia la resistencia del aire)."],
+ ["Gravedad","Atracción que la Tierra ejerce sobre los cuerpos; produce una aceleración cercana a 9.8 m/s² dirigida hacia abajo."],
+ ["Aceleración","Rapidez con la que cambia la velocidad de un cuerpo. Se mide en m/s²."],
+ ["Altura (h)","Distancia vertical que recorre el balín desde el punto de liberación hasta el sensor de impacto."],
+ ["Tiempo (t)","Duración de la caída del balín, medida con el cronómetro desde la liberación hasta el impacto."],
+ ["Movimiento uniformemente acelerado","Movimiento con aceleración constante: la velocidad cambia la misma cantidad en cada segundo."],
+ ["Tiempo promedio (t̄)","Promedio de las tres mediciones de tiempo para una misma altura: t̄ = (t₁+t₂+t₃)/3. Reduce el efecto de los errores aleatorios."],
+ ["Dato experimental","Valor obtenido directamente de una medición en el laboratorio."],
+ ["Ajuste","Procedimiento matemático que encuentra la función que mejor describe un conjunto de datos experimentales."],
+ ["Función cuadrática","Función de la forma y = a·x² + b·x + c; su gráfica es una parábola. En esta práctica, h crece con t²."]
+];
+$("#glosGrid").innerHTML = GLOSARIO.map(([t,d],i)=>
+  '<div class="glos-item"><button aria-expanded="false">'+t+'</button><div class="def">'+d+'</div></div>').join("");
+$$("#glosGrid .glos-item > button").forEach(b=>b.addEventListener("click",()=>{
+  const it=b.parentElement, open=it.classList.toggle("open");
+  b.setAttribute("aria-expanded",open?"true":"false");
+}));
+
+/* ---------- Montaje: etiquetas interactivas ---------- */
+(function(){
+  const wrap=document.querySelector(".montaje-wrap"), tip=$("#montajeTip");
+  if(!wrap) return;
+  function show(part,x,y){
+    tip.textContent=part.dataset.name;
+    const r=wrap.getBoundingClientRect();
+    tip.style.left=(x-r.left)+"px"; tip.style.top=(y-r.top)+"px";
+    tip.classList.add("show");
+  }
+  wrap.addEventListener("pointermove",e=>{
+    const part=e.target.closest(".part");
+    if(part){ show(part,e.clientX,e.clientY); } else tip.classList.remove("show");
+  });
+  wrap.addEventListener("pointerleave",()=>tip.classList.remove("show"));
+  wrap.addEventListener("click",e=>{
+    const part=e.target.closest(".part");
+    $$(".part.sel").forEach(p=>p!==part&&p.classList.remove("sel"));
+    if(part){ part.classList.toggle("sel"); show(part,e.clientX,e.clientY); }
+  });
+})();
+
+/* ---------- Simulación de caída libre ---------- */
+const sim=(function(){
+  const cv=$("#simCanvas"); if(!cv) return {reset(){}};
+  const ctx=cv.getContext("2d");
+  const G=9.8, SLOW=4; // cámara lenta ×4
+  let h=parseFloat($("#simH").value), t=0, playing=false, raf=null, last=0, trail=[];
+
+  const M={top:34, bottom:44, left:0};
+  function yPix(y){ // y físico (m, medido desde el suelo) → pixel
+    const usable=cv.height-M.top-M.bottom;
+    return M.top + (1-y/h)*usable;
+  }
+  function draw(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    // cuadricula
+    ctx.strokeStyle="#f0e9dc"; ctx.lineWidth=1;
+    for(let x=0;x<cv.width;x+=20){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cv.height);ctx.stroke();}
+    for(let y=0;y<cv.height;y+=20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cv.width,y);ctx.stroke();}
+    const X=150;
+    // torre
+    ctx.fillStyle="#9a9a9a"; ctx.fillRect(X-34,M.top-14,7,cv.height-M.top-16);
+    ctx.strokeStyle="#1c1c1c"; ctx.lineWidth=2; ctx.strokeRect(X-34,M.top-14,7,cv.height-M.top-16);
+    // suelo + sensor
+    ctx.fillStyle="#d8d3c6"; ctx.fillRect(20,cv.height-M.bottom+12,cv.width-40,10);
+    ctx.strokeRect(20,cv.height-M.bottom+12,cv.width-40,10);
+    ctx.fillStyle="#c1272d";
+    ctx.beginPath(); ctx.ellipse(X,cv.height-M.bottom+12,16,6,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    // imán arriba
+    ctx.fillStyle="#1c1c1c"; ctx.fillRect(X-22,M.top-26,44,16);
+    // flecha h
+    ctx.strokeStyle="#1c1c1c"; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(52,yPix(h)); ctx.lineTo(52,yPix(0)); ctx.stroke();
+    flecha(52,yPix(h),-1); flecha(52,yPix(0),1);
+    ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(44,yPix(h)); ctx.lineTo(X,yPix(h)); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle="#c1272d"; ctx.font="italic 17px Georgia";
+    ctx.fillText("h",34,(yPix(h)+yPix(0))/2+5);
+    // trayectoria punteada
+    ctx.strokeStyle="#c1272d"; ctx.setLineDash([2,7]);
+    ctx.beginPath(); ctx.moveTo(X,yPix(h)); ctx.lineTo(X,yPix(0)); ctx.stroke(); ctx.setLineDash([]);
+    // estela: posiciones en intervalos iguales de tiempo
+    trail.forEach(y=>{
+      ctx.beginPath(); ctx.arc(X,yPix(Math.max(0,y)),5,0,Math.PI*2);
+      ctx.fillStyle="rgba(58,58,58,.35)"; ctx.fill();
+      ctx.strokeStyle="rgba(28,28,28,.4)"; ctx.lineWidth=1.5; ctx.stroke();
+    });
+    // balín
+    const y=Math.max(0, h-0.5*G*t*t);
+    ctx.beginPath(); ctx.arc(X,yPix(y),11,0,Math.PI*2);
+    ctx.fillStyle="#3a3a3a"; ctx.fill();
+    ctx.strokeStyle="#1c1c1c"; ctx.lineWidth=2.5; ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(X-4,yPix(y)-4,4,2.5,0,0,Math.PI*2);
+    ctx.fillStyle="rgba(255,255,255,.7)"; ctx.fill();
+    // lecturas
+    $("#simT").textContent=fmt(t);
+    $("#simY").textContent=fmt(y,2);
+    return y;
+  }
+  function flecha(x,y,dir){
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-5,y+7*dir); ctx.lineTo(x+5,y+7*dir);
+    ctx.closePath(); ctx.fillStyle="#1c1c1c"; ctx.fill();
+  }
+  function loop(now){
+    if(!playing) return;
+    if(!last) last=now;
+    const dt=(now-last)/1000/SLOW; last=now;
+    t+=dt;
+    const tf=Math.sqrt(2*h/G);
+    // estela cada tf/8
+    const paso=tf/8, idx=Math.floor(t/paso);
+    while(trail.length<idx && trail.length<8){ const tt=(trail.length+1)*paso; trail.push(h-0.5*G*tt*tt); }
+    if(t>=tf){ t=tf; draw(); playing=false; $("#simTfin").textContent=fmt(tf); $("#simPlay").textContent="▶ Soltar balín"; return; }
+    draw();
+    raf=requestAnimationFrame(loop);
+  }
+  function play(){
+    if(playing){ playing=false; $("#simPlay").textContent="▶ Soltar balín"; return; }
+    if(t>=Math.sqrt(2*h/G)) reset();
+    playing=true; last=0; $("#simPlay").textContent="⏸ Pausar";
+    raf=requestAnimationFrame(loop);
+  }
+  function reset(){
+    playing=false; cancelAnimationFrame(raf); t=0; last=0; trail=[];
+    h=parseFloat($("#simH").value);
+    $("#simTfin").textContent="—"; $("#simPlay").textContent="▶ Soltar balín";
+    draw();
+  }
+  $("#simPlay").addEventListener("click",play);
+  $("#simReset").addEventListener("click",reset);
+  $("#simH").addEventListener("input",()=>{ $("#simHval").textContent=fmt(parseFloat($("#simH").value),2); reset(); });
+  draw();
+  return {reset};
+})();
+
+/* ---------- Inicio ---------- */
+buildIndexAndMenu();
+fillInputsFromState();
+updateAll();
+for(let n=1;n<=6;n++) renderProm(n,false);
+goTo(state.page||0);
+window.addEventListener("load",()=>safeTypeset());
+})();
+</script>
+</body>
+</html>
